@@ -39,6 +39,7 @@
     span {
       display: flex;
       align-items: center;
+      text-transform: capitalize;
 
       & + span {
         margin-left: 1.5rem;
