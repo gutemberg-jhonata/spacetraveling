@@ -49,7 +49,7 @@ export default function Home({ postsPagination }: HomeProps) {
                 <p>{post.data.subtitle}</p>
                 <div className={commonStyles.info}>
                   <span>
-                    <FiCalendar /> {post.first_publication_date}
+                    <FiCalendar /> {format(post.first_publication_date)}
                   </span>
                   <span>
                     <FiUser /> {post.data.author}
@@ -77,7 +77,7 @@ export const getStaticProps: GetStaticProps = async () => {
   const results = postsResponse.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: format(post.first_publication_date),
+      first_publication_date: post.first_publication_date,
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,

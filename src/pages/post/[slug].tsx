@@ -48,7 +48,7 @@ export default function Post({ post }: PostProps) {
 
         <div className={commonStyles.info}>
           <span>
-            <FiCalendar /> {post.first_publication_date}
+            <FiCalendar /> {format(post.first_publication_date)}
           </span>
           <span>
             <FiUser /> {post.data.author}
@@ -103,7 +103,7 @@ export const getStaticProps: GetStaticProps = async context => {
   });
 
   const post = {
-    first_publication_date: format(response.first_publication_date),
+    first_publication_date: response.first_publication_date,
     data: {
       title: response.data.title,
       banner: response.data.banner,
