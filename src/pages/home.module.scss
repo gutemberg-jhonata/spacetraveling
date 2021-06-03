@@ -1,6 +1,10 @@
 .homeContainer {
   header {
     margin: 4rem auto;
+
+    @media (max-width: 720px) {
+      margin: 4rem 1rem;
+    }
   }
 }
 
@@ -8,6 +12,10 @@
   max-width: 700px;
   margin: 0 auto;
   transition: color 0.2s;
+
+  @media (max-width: 720px) {
+    margin: 0 1rem;
+  }
 
   a + a {
     display: block;
