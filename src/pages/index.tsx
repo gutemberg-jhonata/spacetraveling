@@ -1,9 +1,8 @@
 import { GetStaticProps } from 'next';
 import Link from 'next/link';
+import Head from 'next/head';
 
-import { format, parseISO } from 'date-fns';
-import pt from 'date-fns/locale/pt-BR';
-
+import { format } from '../utils/formatDate';
 import Prismic from '@prismicio/client';
 import { getPrismicClient } from '../services/prismic';
 
@@ -35,15 +34,20 @@ interface HomeProps {
 export default function Home({ postsPagination }: HomeProps) {
   return (
     <div className={styles.homeContainer}>
+      <Head>
+        <title>Home | spacetraveling</title>
+      </Head>
+
       <Header />
-      <div className={styles.posts}>
+
+      <div className={`${styles.posts} ${commonStyles.container}`}>
         {postsPagination.results.map(post => {
           return (
             <Link href={`/post/${post.uid}`} key={post.uid}>
               <a>
                 <h1>{post.data.title}</h1>
                 <p>{post.data.subtitle}</p>
-                <div className={styles.info}>
+                <div className={commonStyles.info}>
                   <span>
                     <FiCalendar /> {post.first_publication_date}
                   </span>
@@ -73,13 +77,7 @@ export const getStaticProps: GetStaticProps = async () => {
   const results = postsResponse.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: format(
-        parseISO(post.first_publication_date),
-        'dd MMM yyyy',
-        {
-          locale: pt,
-        }
-      ),
+      first_publication_date: format(post.first_publication_date),
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,

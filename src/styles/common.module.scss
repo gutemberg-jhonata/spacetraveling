@@ -1,1 +1,31 @@
-// TODO
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+
+  @media (max-width: 720px) {
+    margin: 0 1rem;
+  }
+}
+
+.info {
+  font-size: 0.875rem;
+  color: var(--info);
+  display: flex;
+  align-items: center;
+
+  span {
+    display: flex;
+    align-items: center;
+    text-transform: capitalize;
+
+    & + span {
+      margin-left: 1.5rem;
+    }
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+    margin-right: 0.5rem;
+  }
+}
