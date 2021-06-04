@@ -36,41 +36,49 @@ export default function Post({ post }: PostProps) {
   return (
     <>
       <Head>
-        <title>{post.data.title} | spacetraveling</title>
+        <title>{post ? post.data.title : 'Post'} | spacetraveling</title>
       </Head>
 
       <Header />
 
-      <img src={post.data.banner.url} className={styles.banner} />
+      <main className={commonStyles.container}>
+        {post ? (
+          <>
+            <img src={post.data.banner.url} className={styles.banner} />
 
-      <div className={`${styles.post} ${commonStyles.container}`}>
-        <h1>{post.data.title}</h1>
+            <article className={styles.post}>
+              <h1>{post.data.title}</h1>
 
-        <div className={commonStyles.info}>
-          <span>
-            <FiCalendar /> {format(post.first_publication_date)}
-          </span>
-          <span>
-            <FiUser /> {post.data.author}
-          </span>
-          <span>
-            <FiClock /> {post.data.author}
-          </span>
-        </div>
+              <div className={commonStyles.info}>
+                <span>
+                  <FiCalendar /> {format(post.first_publication_date)}
+                </span>
+                <span>
+                  <FiUser /> {post.data.author}
+                </span>
+                <span>
+                  <FiClock /> {post.data.author}
+                </span>
+              </div>
 
-        <div className={`${styles.content}`}>
-          {post.data.content.map(content => {
-            return (
-              <section key={content.heading}>
-                <h2>{content.heading}</h2>
-                {content.body.map(body => (
-                  <p key={body.text}>{body.text}</p>
-                ))}
-              </section>
-            );
-          })}
-        </div>
-      </div>
+              <div className={`${styles.content}`}>
+                {post.data.content.map(content => {
+                  return (
+                    <section key={content.heading}>
+                      <h2>{content.heading}</h2>
+                      {content.body.map(body => (
+                        <p key={body.text}>{body.text}</p>
+                      ))}
+                    </section>
+                  );
+                })}
+              </div>
+            </article>
+          </>
+        ) : (
+          <p>Carregando...</p>
+        )}
+      </main>
     </>
   );
 }
@@ -81,7 +89,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   return {
     paths: [],
-    fallback: 'blocking',
+    fallback: true,
   };
 };
 
