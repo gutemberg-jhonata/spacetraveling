@@ -11,6 +11,7 @@ import Header from '../components/Header';
 
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
+import { useState } from 'react';
 
 interface Post {
   uid?: string;
@@ -32,6 +33,18 @@ interface HomeProps {
 }
 
 export default function Home({ postsPagination }: HomeProps) {
+  const [nextPage, setNextPage] = useState(postsPagination.next_page);
+  const [posts, setPosts] = useState(postsPagination.results);
+
+  function handlePagination() {
+    fetch(nextPage)
+      .then(response => response.json())
+      .then(data => {
+        setNextPage(data.nextPage);
+        setPosts([...posts, ...data.results]);
+      });
+  }
+
   return (
     <div className={styles.homeContainer}>
       <Head>
@@ -41,7 +54,7 @@ export default function Home({ postsPagination }: HomeProps) {
       <Header />
 
       <div className={`${styles.posts} ${commonStyles.container}`}>
-        {postsPagination.results.map(post => {
+        {posts.map(post => {
           return (
             <Link href={`/post/${post.uid}`} key={post.uid}>
               <a>
@@ -59,6 +72,12 @@ export default function Home({ postsPagination }: HomeProps) {
             </Link>
           );
         })}
+
+        {nextPage && (
+          <button type="button" onClick={handlePagination}>
+            Carregar mais posts
+          </button>
+        )}
       </div>
     </div>
   );
@@ -70,7 +89,7 @@ export const getStaticProps: GetStaticProps = async () => {
     [Prismic.predicates.at('document.type', 'posts')],
     {
       fetch: ['posts.title', 'posts.subtitle', 'posts.author'],
-      pageSize: 10,
+      pageSize: 1,
     }
   );
 
