@@ -85,9 +85,11 @@ export default function Post({ post }: PostProps) {
                 return (
                   <section key={content.heading}>
                     <h2>{content.heading}</h2>
-                    {content.body.map(body => (
-                      <p key={body.text}>{body.text}</p>
-                    ))}
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: RichText.asHtml(content.body),
+                      }}
+                    />
                   </section>
                 );
               })}
@@ -107,7 +109,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     [Prismic.predicates.at('document.type', 'posts')],
     {
       fetch: ['posts.uid'],
-      pageSize: 2,
+      pageSize: 1,
     }
   );
 
