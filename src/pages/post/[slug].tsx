@@ -1,6 +1,7 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
 import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
+import { useRouter } from 'next/router';
 import { format } from '../../utils/formatDate';
 
 import Header from '../../components/Header';
@@ -34,6 +35,8 @@ interface PostProps {
 }
 
 export default function Post({ post }: PostProps) {
+  const router = useRouter();
+
   let estimatedReadingTime = '';
 
   if (post) {
@@ -53,52 +56,50 @@ export default function Post({ post }: PostProps) {
     estimatedReadingTime = `${Math.ceil(totalWords / 200)} min`;
   }
 
+  if (router.isFallback) {
+    return <p>Carregando...</p>;
+  }
+
   return (
     <>
       <Head>
-        <title>{post ? post.data.title : 'Post'} | spacetraveling</title>
+        <title>{post.data.title} | spacetraveling</title>
       </Head>
 
       <Header />
 
-      {post ? (
-        <>
-          <img src={post.data.banner.url} className={styles.banner} />
+      <img src={post.data.banner.url} className={styles.banner} />
 
-          <article className={`${styles.post} ${commonStyles.container}`}>
-            <h1>{post.data.title}</h1>
+      <article className={`${styles.post} ${commonStyles.container}`}>
+        <h1>{post.data.title}</h1>
 
-            <div className={commonStyles.info}>
-              <span>
-                <FiCalendar /> {format(post.first_publication_date)}
-              </span>
-              <span>
-                <FiUser /> {post.data.author}
-              </span>
-              <span>
-                <FiClock /> {estimatedReadingTime}
-              </span>
-            </div>
+        <div className={commonStyles.info}>
+          <span>
+            <FiCalendar /> {format(post.first_publication_date)}
+          </span>
+          <span>
+            <FiUser /> {post.data.author}
+          </span>
+          <span>
+            <FiClock /> {estimatedReadingTime}
+          </span>
+        </div>
 
-            <div className={`${styles.content}`}>
-              {post.data.content.map(content => {
-                return (
-                  <section key={content.heading}>
-                    <h2>{content.heading}</h2>
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: RichText.asHtml(content.body),
-                      }}
-                    />
-                  </section>
-                );
-              })}
-            </div>
-          </article>
-        </>
-      ) : (
-        <p className={commonStyles.container}>Carregando...</p>
-      )}
+        <div className={`${styles.content}`}>
+          {post.data.content.map(content => {
+            return (
+              <section key={content.heading}>
+                <h2>{content.heading}</h2>
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: RichText.asHtml(content.body),
+                  }}
+                />
+              </section>
+            );
+          })}
+        </div>
+      </article>
     </>
   );
 }
