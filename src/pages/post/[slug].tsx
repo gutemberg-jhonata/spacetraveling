@@ -5,12 +5,12 @@ import { format } from '../../utils/formatDate';
 
 import Header from '../../components/Header';
 
+import Prismic from '@prismicio/client';
 import { getPrismicClient } from '../../services/prismic';
 import { RichText } from 'prismic-dom';
 
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
-import { useEffect } from 'react';
 
 interface Post {
   first_publication_date: string | null;
@@ -102,11 +102,25 @@ export default function Post({ post }: PostProps) {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  //   const prismic = getPrismicClient();
-  //   const posts = await prismic.query(TODO);
+  const prismic = getPrismicClient();
+  const posts = await prismic.query(
+    [Prismic.predicates.at('document.type', 'posts')],
+    {
+      fetch: ['posts.uid'],
+      pageSize: 2,
+    }
+  );
+
+  const paths = posts.results.map(post => {
+    return {
+      params: {
+        slug: post.uid,
+      },
+    };
+  });
 
   return {
-    paths: [],
+    paths,
     fallback: true,
   };
 };
