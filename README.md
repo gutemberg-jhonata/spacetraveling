@@ -31,6 +31,7 @@ Esse projeto foi desenvolvido com as seguintes tecnologias:
 - NextJS
 - SASS
 - Prismic CMS
+- Utterances
 
 ## 🚀 Uso
 

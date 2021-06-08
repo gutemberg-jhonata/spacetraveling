@@ -12,6 +12,7 @@ import { RichText } from 'prismic-dom';
 
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
+import { Comments } from '../../components/Comments';
 
 interface Post {
   first_publication_date: string | null;
@@ -70,36 +71,42 @@ export default function Post({ post }: PostProps) {
 
       <img src={post.data.banner.url} className={styles.banner} />
 
-      <article className={`${styles.post} ${commonStyles.container}`}>
-        <h1>{post.data.title}</h1>
+      <div className={commonStyles.container}>
+        <article className={styles.post}>
+          <h1>{post.data.title}</h1>
 
-        <div className={commonStyles.info}>
-          <span>
-            <FiCalendar /> {format(post.first_publication_date)}
-          </span>
-          <span>
-            <FiUser /> {post.data.author}
-          </span>
-          <span>
-            <FiClock /> {estimatedReadingTime}
-          </span>
-        </div>
+          <div className={commonStyles.info}>
+            <span>
+              <FiCalendar /> {format(post.first_publication_date)}
+            </span>
+            <span>
+              <FiUser /> {post.data.author}
+            </span>
+            <span>
+              <FiClock /> {estimatedReadingTime}
+            </span>
+          </div>
 
-        <div className={`${styles.content}`}>
-          {post.data.content.map(content => {
-            return (
-              <section key={content.heading}>
-                <h2>{content.heading}</h2>
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: RichText.asHtml(content.body),
-                  }}
-                />
-              </section>
-            );
-          })}
-        </div>
-      </article>
+          <div className={`${styles.content}`}>
+            {post.data.content.map(content => {
+              return (
+                <section key={content.heading}>
+                  <h2>{content.heading}</h2>
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: RichText.asHtml(content.body),
+                    }}
+                  />
+                </section>
+              );
+            })}
+          </div>
+        </article>
+        <footer>
+          <div className={styles.divider} />
+          <Comments />
+        </footer>
+      </div>
     </>
   );
 }
