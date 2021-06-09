@@ -4,7 +4,7 @@ import { getPrismicClient } from '../../services/prismic';
 
 function linkResolver(doc: Document): string {
   if (doc.type === 'posts') {
-    return `/posts/${doc.uid}`;
+    return `/post/${doc.uid}`;
   }
 
   return '/';
