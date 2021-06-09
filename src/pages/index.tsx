@@ -2,7 +2,11 @@ import { GetStaticProps } from 'next';
 import Link from 'next/link';
 import Head from 'next/head';
 
+import { useState } from 'react';
+
 import { format } from '../utils/formatDate';
+import { formatISO } from 'date-fns';
+
 import Prismic from '@prismicio/client';
 import { getPrismicClient } from '../services/prismic';
 
@@ -11,7 +15,7 @@ import Header from '../components/Header';
 
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
-import { useState } from 'react';
+import { ExitPreview } from '../components/ExitPreview';
 
 interface Post {
   uid?: string;
@@ -29,10 +33,11 @@ interface PostPagination {
 }
 
 interface HomeProps {
-  postsPagination: PostPagination;
+  postsPagination: PostPagination,
+  preview: boolean
 }
 
-export default function Home({ postsPagination }: HomeProps) {
+export default function Home({ postsPagination, preview }: HomeProps) {
   const [nextPage, setNextPage] = useState(postsPagination.next_page);
   const [posts, setPosts] = useState(postsPagination.results);
 
@@ -78,25 +83,28 @@ export default function Home({ postsPagination }: HomeProps) {
             Carregar mais posts
           </button>
         )}
+
+        {preview && <ExitPreview />}
       </div>
     </div>
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getStaticProps: GetStaticProps = async ({ preview = false, previewData }) => {
   const prismic = getPrismicClient();
   const postsResponse = await prismic.query(
     [Prismic.predicates.at('document.type', 'posts')],
     {
       fetch: ['posts.title', 'posts.subtitle', 'posts.author'],
       pageSize: 1,
+      ref: previewData?.ref ?? null
     }
   );
 
   const results = postsResponse.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: post.first_publication_date,
+      first_publication_date: post.first_publication_date ?? formatISO(new Date()),
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
@@ -111,6 +119,7 @@ export const getStaticProps: GetStaticProps = async () => {
         next_page: postsResponse.next_page,
         results,
       },
+      preview
     },
     revalidate: 24 * 60 * 60, // 24 horas
   };

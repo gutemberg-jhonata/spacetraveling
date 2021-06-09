@@ -13,6 +13,8 @@ import { RichText } from 'prismic-dom';
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 import { Comments } from '../../components/Comments';
+import { formatISO } from 'date-fns';
+import { ExitPreview } from '../../components/ExitPreview';
 
 interface Post {
   first_publication_date: string | null;
@@ -33,9 +35,10 @@ interface Post {
 
 interface PostProps {
   post: Post;
+  preview: boolean
 }
 
-export default function Post({ post }: PostProps) {
+export default function Post({ post, preview }: PostProps) {
   const router = useRouter();
 
   let estimatedReadingTime = '';
@@ -104,7 +107,10 @@ export default function Post({ post }: PostProps) {
         </article>
         <footer>
           <div className={styles.divider} />
+
           <Comments />
+
+          {preview && <ExitPreview />}
         </footer>
       </div>
     </>
@@ -139,7 +145,9 @@ export const getStaticProps: GetStaticProps = async context => {
   const { slug } = context.params;
 
   const prismic = getPrismicClient();
-  const response = await prismic.getByUID('posts', String(slug), {});
+  const response = await prismic.getByUID('posts', String(slug), {
+    ref: context?.previewData?.ref ?? null
+  });
 
   const content = response.data.content.map(content => {
     return {
@@ -150,7 +158,7 @@ export const getStaticProps: GetStaticProps = async context => {
 
   const post = {
     uid: response.uid,
-    first_publication_date: response.first_publication_date,
+    first_publication_date: response?.first_publication_date ?? formatISO(new Date()),
     data: {
       title: response.data.title,
       subtitle: response.data.subtitle,
@@ -165,6 +173,7 @@ export const getStaticProps: GetStaticProps = async context => {
   return {
     props: {
       post,
+      preview: context?.preview ?? false
     },
     revalidate: 24 * 60 * 60, // 24 horas
   };
