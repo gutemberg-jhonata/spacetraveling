@@ -1,7 +1,10 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
-import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
+
+import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
+
 import { format } from '../../utils/formatDate';
 
 import Header from '../../components/Header';
@@ -35,10 +38,18 @@ interface Post {
 
 interface PostProps {
   post: Post;
-  preview: boolean
+  preview: boolean,
+  nextPage: {
+    slug: string,
+    title: string
+  } | null,
+  previousPage: {
+    slug: string,
+    title: string
+  } | null
 }
 
-export default function Post({ post, preview }: PostProps) {
+export default function Post({ post, preview, nextPage, previousPage }: PostProps) {
   const router = useRouter();
 
   let estimatedReadingTime = '';
@@ -108,6 +119,30 @@ export default function Post({ post, preview }: PostProps) {
         <footer>
           <div className={styles.divider} />
 
+          <nav className={styles.postNavigation}>
+            <div>
+              {previousPage && (
+                <>
+                  <Link href={`/post/${previousPage.slug}`}>
+                    <a>{previousPage.title}</a>
+                  </Link>
+                  <span>Post anterior</span>
+                </>
+              )}
+            </div>
+
+            <div className={styles.nextPost}>
+              {nextPage && (
+                <>
+                  <Link href={`/post/${nextPage.slug}`}>
+                    <a>{nextPage.title}</a>
+                  </Link>
+                  <span>Próximo post</span>
+                </>
+              )}
+            </div>
+          </nav>
+
           <Comments />
 
           {preview && <ExitPreview />}
@@ -146,8 +181,51 @@ export const getStaticProps: GetStaticProps = async context => {
 
   const prismic = getPrismicClient();
   const response = await prismic.getByUID('posts', String(slug), {
-    ref: context?.previewData?.ref ?? null
+    ref: context?.previewData?.ref ?? null,
+    fetch: ["next_page"]
   });
+
+  const previousPageResponse = await prismic.query(
+    [
+      Prismic.predicates.dateAfter(
+        'document.first_publication_date',
+        response.first_publication_date
+      )
+    ],
+    {
+      fetch: ['posts.title'],
+      pageSize: 1
+    }
+  );
+
+  let previousPage = null;
+  if (previousPageResponse.results.length > 0) {
+    previousPage = {
+      slug: previousPageResponse.results[0].uid,
+      title: previousPageResponse.results[0].data.title
+    }
+  }
+
+  const nextPageResponse = await prismic.query(
+    [
+      Prismic.predicates.dateBefore(
+        'document.first_publication_date',
+        response.first_publication_date
+      )
+    ],
+    {
+      fetch: ['posts.title'],
+      pageSize: 1
+    }
+  );
+
+  let nextPage = null;
+  if (nextPageResponse.results.length > 0) {
+    nextPage = {
+      slug: nextPageResponse.results[0].uid,
+      title: nextPageResponse.results[0].data.title
+    }
+  }
 
   const content = response.data.content.map(content => {
     return {
@@ -173,7 +251,9 @@ export const getStaticProps: GetStaticProps = async context => {
   return {
     props: {
       post,
-      preview: context?.preview ?? false
+      preview: context?.preview ?? false,
+      previousPage,
+      nextPage
     },
     revalidate: 24 * 60 * 60, // 24 horas
   };

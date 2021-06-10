@@ -48,7 +48,36 @@
 .divider {
   width: 100%;
   height: 1px;
-  background: #D7D7D7;
+  background: #d7d7d7;
   opacity: 0.1;
   margin-bottom: 3rem;
+}
+
+.postNavigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 5rem;
+
+  a {
+    font-size: 1.125rem;
+    color: var(--heading);
+    transition: text-decoration 0.2s;
+    display: block;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  span {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--highlight);
+  }
+
+  .nextPost {
+    text-align: right;
+  }
 }
