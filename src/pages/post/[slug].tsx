@@ -21,6 +21,7 @@ import { ExitPreview } from '../../components/ExitPreview';
 
 interface Post {
   first_publication_date: string | null;
+  last_publication_date: string | null;
   data: {
     title: string;
     banner: {
@@ -38,18 +39,23 @@ interface Post {
 
 interface PostProps {
   post: Post;
-  preview: boolean,
+  preview: boolean;
   nextPage: {
-    slug: string,
-    title: string
-  } | null,
+    slug: string;
+    title: string;
+  } | null;
   previousPage: {
-    slug: string,
-    title: string
-  } | null
+    slug: string;
+    title: string;
+  } | null;
 }
 
-export default function Post({ post, preview, nextPage, previousPage }: PostProps) {
+export default function Post({
+  post,
+  preview,
+  nextPage,
+  previousPage,
+}: PostProps) {
   const router = useRouter();
 
   let estimatedReadingTime = '';
@@ -101,7 +107,11 @@ export default function Post({ post, preview, nextPage, previousPage }: PostProp
             </span>
           </div>
 
-          <div className={`${styles.content}`}>
+          {post.last_publication_date && (
+            <p className={styles.updatedDate}>{post.last_publication_date}</p>
+          )}
+
+          <div className={styles.content}>
             {post.data.content.map(content => {
               return (
                 <section key={content.heading}>
@@ -182,7 +192,7 @@ export const getStaticProps: GetStaticProps = async context => {
   const prismic = getPrismicClient();
   const response = await prismic.getByUID('posts', String(slug), {
     ref: context?.previewData?.ref ?? null,
-    fetch: ["next_page"]
+    fetch: ['next_page'],
   });
 
   const previousPageResponse = await prismic.query(
@@ -190,11 +200,11 @@ export const getStaticProps: GetStaticProps = async context => {
       Prismic.predicates.dateAfter(
         'document.first_publication_date',
         response.first_publication_date
-      )
+      ),
     ],
     {
       fetch: ['posts.title'],
-      pageSize: 1
+      pageSize: 1,
     }
   );
 
@@ -202,8 +212,8 @@ export const getStaticProps: GetStaticProps = async context => {
   if (previousPageResponse.results.length > 0) {
     previousPage = {
       slug: previousPageResponse.results[0].uid,
-      title: previousPageResponse.results[0].data.title
-    }
+      title: previousPageResponse.results[0].data.title,
+    };
   }
 
   const nextPageResponse = await prismic.query(
@@ -211,11 +221,11 @@ export const getStaticProps: GetStaticProps = async context => {
       Prismic.predicates.dateBefore(
         'document.first_publication_date',
         response.first_publication_date
-      )
+      ),
     ],
     {
       fetch: ['posts.title'],
-      pageSize: 1
+      pageSize: 1,
     }
   );
 
@@ -223,8 +233,8 @@ export const getStaticProps: GetStaticProps = async context => {
   if (nextPageResponse.results.length > 0) {
     nextPage = {
       slug: nextPageResponse.results[0].uid,
-      title: nextPageResponse.results[0].data.title
-    }
+      title: nextPageResponse.results[0].data.title,
+    };
   }
 
   const content = response.data.content.map(content => {
@@ -234,9 +244,18 @@ export const getStaticProps: GetStaticProps = async context => {
     };
   });
 
+  const last_publication_date =
+    response.last_publication_date &&
+    format(
+      response.last_publication_date,
+      "'* editado em 'dd MMM yyyy', às 'HH:mm"
+    );
+
   const post = {
     uid: response.uid,
-    first_publication_date: response?.first_publication_date ?? formatISO(new Date()),
+    first_publication_date:
+      response.first_publication_date ?? formatISO(new Date()),
+    last_publication_date,
     data: {
       title: response.data.title,
       subtitle: response.data.subtitle,
@@ -253,7 +272,7 @@ export const getStaticProps: GetStaticProps = async context => {
       post,
       preview: context?.preview ?? false,
       previousPage,
-      nextPage
+      nextPage,
     },
     revalidate: 24 * 60 * 60, // 24 horas
   };
