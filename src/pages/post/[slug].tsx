@@ -195,42 +195,46 @@ export const getStaticProps: GetStaticProps = async context => {
     fetch: ['next_page'],
   });
 
-  const previousPageResponse = await prismic.query(
-    [
-      Prismic.predicates.dateAfter(
-        'document.first_publication_date',
-        response.first_publication_date
-      ),
-    ],
-    {
-      fetch: ['posts.title'],
-      pageSize: 1,
-    }
-  );
+  const previousPageResponse =
+    response.first_publication_date &&
+    (await prismic.query(
+      [
+        Prismic.predicates.dateAfter(
+          'document.first_publication_date',
+          response.first_publication_date
+        ),
+      ],
+      {
+        fetch: ['posts.title'],
+        pageSize: 1,
+      }
+    ));
 
   let previousPage = null;
-  if (previousPageResponse.results.length > 0) {
+  if (previousPageResponse?.results.length > 0) {
     previousPage = {
       slug: previousPageResponse.results[0].uid,
       title: previousPageResponse.results[0].data.title,
     };
   }
 
-  const nextPageResponse = await prismic.query(
-    [
-      Prismic.predicates.dateBefore(
-        'document.first_publication_date',
-        response.first_publication_date
-      ),
-    ],
-    {
-      fetch: ['posts.title'],
-      pageSize: 1,
-    }
-  );
+  const nextPageResponse =
+    response.first_publication_date &&
+    (await prismic.query(
+      [
+        Prismic.predicates.dateBefore(
+          'document.first_publication_date',
+          response.first_publication_date
+        ),
+      ],
+      {
+        fetch: ['posts.title'],
+        pageSize: 1,
+      }
+    ));
 
   let nextPage = null;
-  if (nextPageResponse.results.length > 0) {
+  if (nextPageResponse?.results.length > 0) {
     nextPage = {
       slug: nextPageResponse.results[0].uid,
       title: nextPageResponse.results[0].data.title,
